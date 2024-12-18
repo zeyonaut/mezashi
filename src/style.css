@@ -1,0 +1,370 @@
+/* Color scheme options. */
+
+.card.nightMode {
+  --bg-color: var(--canvas);
+  --bg-elevated: rgba(0, 0, 0, 0.12);
+
+  --fg-color: white;
+  --fg-subtle: rgba(255, 255, 255, 0.3);
+
+  --heiban: #51d6ff;
+  --atamadaka: #fb4b4e;
+  --nakadaka: #ffb140;
+  --odaka: #96f550;
+  --highlight: #af85f4;
+
+  --bold: var(--highlight);
+  --link: #93c5fd;
+}
+
+.card:not(.nightMode) {
+  --bg-color: #fffaf0;
+  --bg-elevated: rgba(0, 0, 0, 0.03);
+
+  --fg-color: #333333;
+  --fg-subtle: rgba(0, 0, 0, 0.6);
+
+  --heiban: #1aa0ce;
+  --atamadaka: #1e1e1e;
+  --nakadaka: #ff6b03;
+  --odaka: #61ad3b;
+  --highlight: #7e53c4;
+
+  --bold: #999999;
+  --link: #3b82f6;
+}
+
+/* Font and layout options. */
+
+.card {
+  --large-size: 44px;
+  --medium-size: 25px;
+  --small-size: 20px;
+  --tiny-size: 16px;
+
+  --tiny-size: 16px;
+  --tiny-size: 16px;
+  --large-size: 44px;
+  --small-size: 20px;
+  --medium-size: 25px;
+  --small-size: 20px;
+
+  --font-sans: "ヒラギノ角ゴ Pro W3", "Hiragino Kaku Gothic Pro", "Noto Sans JP", Osaka, "メイリオ", Meiryo, "ＭＳ Ｐゴシック", "MS PGothic", "MS UI Gothic", sans-serif;
+  --max-width: 800px;
+
+  font-size: var(--tiny-size);
+}
+
+/* Style resets. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+.card {
+  font-family: var(--font-sans);
+  background-color: var(--bg-color) !important;
+  color: var(--fg-color) !important;
+}
+
+a {
+  color: var(--link) !important;
+}
+
+b {
+  color: var(--bold);
+}
+
+ruby rt {
+  user-select: none;
+}
+
+/* Generic classes */
+
+.hidden {
+  display: none !important;
+}
+
+/* Accent highlights. */
+
+.highlight-heiban {
+  color: var(--heiban);
+}
+
+.highlight-atamadaka {
+  color: var(--atamadaka);
+}
+
+.highlight-nakadaka {
+  color: var(--nakadaka);
+}
+
+.highlight-odaka {
+  color: var(--odaka);
+}
+
+.highlight-generic {
+  color: var(--highlight);
+}
+
+/* Common elements. */
+
+#qa {
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  min-height: calc(100vh - 40px);
+  text-align: center;
+}
+
+header {
+  color: var(--fg-subtle);
+  margin-bottom: 20px;
+  text-align: right;
+  user-select: none;
+}
+
+main {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Front elements. */
+
+#front-expression {
+  font-size: var(--large-size);
+}
+
+#front-sentence {
+  font-size: var(--small-size);
+}
+
+#hint {
+  font-size: var(--small-size);
+}
+
+/* Back expression. */
+
+#expression-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  max-width: var(--max-width);
+  width: 100%;
+  background: var(--bg-elevated);
+  padding: 20px;
+}
+
+#expression {
+  font-size: var(--large-size);
+}
+
+#expression-note {
+  display: inline-block;
+  font-size: 25px;
+}
+
+/* Pronunciation guides. */
+
+#pronunciation {
+  user-select: none;
+  font-size: 25px;
+}
+
+#pronunciation ul {
+  list-style: none;
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+#pronunciation li {
+  display: inline-block;
+}
+
+#pronunciation li:not(:first-child)::before {
+  content: "・";
+  color: var(--fg-color);
+}
+
+/* Pitch accent diagrams. */
+
+.pitch-low,
+.pitch-high,
+.pitch-downstep {
+  position: relative;
+}
+
+.pitch-downstep {
+  padding-right: 0.1em;
+  margin-right: 0.1em;
+}
+
+.pitch-high > .pitch-line,
+.pitch-downstep > .pitch-line {
+  display: block;
+  position: absolute;
+  top: 0.1em;
+  left: 0;
+  border-top-width: 0.1em;
+  border-top-style: solid;
+}
+
+.pitch-high > .pitch-line {
+  right: 0;
+  height: 0;
+}
+
+.pitch-downstep > .pitch-line {
+  right: -0.1em;
+  height: 0.4em;
+  border-right-width: 0.1em;
+  border-right-style: solid;
+}
+
+/* Back sentence. */
+
+#sentence-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  max-width: var(--max-width);
+  width: 100%;
+  padding: 20px;
+}
+
+#sentence {
+  font-size: var(--medium-size);
+  display: inline-block;
+  width: calc(100% - 20px);
+  max-width: var(--max-width);
+}
+
+#sentence-note {
+  display: inline-block;
+  font-size: 20px;
+}
+
+/* Sentence furigana. */
+
+#sentence ruby rt {
+  opacity: 0;
+}
+
+#sentence ruby:hover rt {
+  opacity: 1;
+}
+
+#sentence b>ruby rt {
+  opacity: 1;
+}
+
+/* Definitions */
+
+#definition-title-box {
+  color: var(--fg-subtle);
+  user-select: none;
+}
+
+#definition-box {
+  max-width: var(--max-width);
+  width: 100%;
+}
+
+/* Yomitan dictionaries. */
+
+#definition-box .yomitan-glossary > ol {
+  margin-block: 0;
+  padding-inline: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#definition-box .yomitan-glossary > ol > li {
+  display: block;
+  padding: 20px;
+  background-color: var(--bg-elevated);
+  align-items: left;
+  justify-content: left;
+  text-align: justify;
+  line-height: 1.75em;
+  font-size: var(--tiny-size);
+}
+
+#primary ul > li:not(:first-child)::before {
+  white-space: pre-wrap;
+  content: ' | ';
+  display: inline;
+}
+
+#primary ul > li {
+  display: inline;
+}
+
+#primary ul {
+  display: inline;
+  list-style: none;
+  padding-left: 0;
+}
+
+.dict-group__tag-list .dict-group__tag:not(:first-child)::before {
+  content: ", ";
+}
+
+.dict-group__tag-list::before {
+  content: "(";
+}
+
+.dict-group__tag-list::after {
+  content: ") ";
+}
+
+/* Notes. */
+
+summary {
+  color: var(--fg-subtle);
+  user-select: none;
+  cursor: pointer;
+}
+
+#notes {
+  padding: 20px;
+}
+
+/* Tags. */
+
+#tags-box {
+  max-width: var(--max-width);
+  width: 100%;
+  flex-grow: 1;
+}
+
+.tag {
+  padding: 1px 5px;
+  font-size: 0.9rem;
+  background-color: var(--bg-elevated);
+  display: inline-table; /* So double-clicking only selects one tag. */
+  margin: auto 3px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

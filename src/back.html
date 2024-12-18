@@ -1,0 +1,251 @@
+<header>
+    <div id="frequency-box">
+        {{Frequency}}
+    </div>
+</header>
+
+<main>
+    <div id="expression-box">
+        <div id="expression">
+            {{#Expression Furigana}}{{furigana:Expression Furigana}}{{/Expression Furigana}}{{^Expression Furigana}}{{Expression}}{{/Expression Furigana}}
+        </div>
+
+        <div id="pronunciation">
+            <div class="highlight-generic">
+                {{#Expression Furigana}}{{kana:Expression Furigana}}{{/Expression Furigana}}
+                {{^Expression Furigana}}{{Expression Reading}}{{/Expression Furigana}}
+            </div>
+        </div>
+
+        {{#Expression Note}}
+        <div id="expression-note">
+            {{Expression Note}}
+        </div>
+        {{/Expression Note}}
+    </div>
+
+    {{#Sentence Furigana}}
+    <div id="sentence-box">
+        <div id="sentence">
+            {{#Sentence Furigana}}{{furigana:Sentence Furigana}}{{/Sentence Furigana}}
+            {{^Sentence Furigana}}{{furigana:Sentence}}{{/Sentence Furigana}}
+        </div>
+
+        {{#Sentence Note}}
+        <div id="sentence-note">
+            {{Sentence Note}}
+        </div>
+        {{/Sentence Note}}
+    </div>
+    {{/Sentence Furigana}}
+
+    {{^Sentence Furigana}}{{#Sentence}}
+    <div id="sentence-box">
+        <div id="sentence">
+            {{#Sentence Furigana}}{{furigana:Sentence Furigana}}{{/Sentence Furigana}}
+            {{^Sentence Furigana}}{{furigana:Sentence}}{{/Sentence Furigana}}
+        </div>
+
+        {{#Sentence Note}}
+        <div id="sentence-note">
+            {{Sentence Note}}
+        </div>
+        {{/Sentence Note}}
+    </div>
+    {{/Sentence}}{{/Sentence Furigana}}
+
+    <div style="user-select: none;">{{Expression Audio}} {{Sentence Audio}}</div>
+
+    <div id="definition-title-box" class="hidden"></div>
+
+    <div id="definition-box" class="hidden"></div>
+
+    {{#Notes}}
+    <details>
+        <summary>Notes</summary>
+        <div id="notes">{{Notes}}</div>
+    </details>
+    {{/Notes}}
+</main>
+
+<footer>
+    <div id="tags-box">
+        {{#Tags}}
+        <div class="tag">{{Tags}}</div>
+        {{/Tags}}
+    </div>
+</footer>
+
+<script>
+    // Generate pronunciation guides.
+
+    function is_heiban(accent_nucleus) { return accent_nucleus === 0; }
+
+    function is_atamadaka(accent_nucleus) { return accent_nucleus === 1; }
+
+    function compute_pitch_kind(moras, accent_nucleus) {
+        if (is_heiban(accent_nucleus)) return 'heiban';
+        else if (is_atamadaka(accent_nucleus)) return 'atamadaka';
+        else return (accent_nucleus === moras.length) ? 'odaka' : 'nakadaka';
+    }
+
+    function convert_to_kata(hira) {
+        const code = hira.charCodeAt(0);
+        return (code < 0x3041 || code > 0x3096) ? hira : String.fromCharCode(code + 0x60);
+    }
+
+    function compute_moras(kata) {
+        const vowels = ['ャ', 'ュ', 'ョ', 'ァ', 'ィ', 'ゥ', 'ェ', 'ォ'];
+        const moras = [];
+        for (let i = 0; i < kata.length; ++i)
+            if (i + 1 < kata.length && vowels.includes(kata[i + 1])) {
+                moras.push(kata.slice(i, i + 2));
+                i += 1;
+            } else moras.push(kata[i]);
+        return moras;
+    }
+
+    function compute_pitch_pattern(moras, accent_nucleus) {
+        if (is_heiban(accent_nucleus))
+            return [[moras[0], 'low'], [moras.slice(1).join(''), 'high']];
+        else if (is_atamadaka(accent_nucleus))
+            return [[moras[0], 'downstep'], [moras.slice(1).join(''), 'low']];
+        else return [
+            [moras[0], 'low'],
+            [moras.slice(1, accent_nucleus).join(''), 'downstep'],
+            [moras.slice(accent_nucleus).join(''), 'low'],
+        ];
+    }
+
+    function create_pitch_span(substring, pitch_segment) {
+        const text_span = document.createElement('span');
+        text_span.className = 'pitch-char';
+        text_span.innerText = substring;
+
+        const line_span = document.createElement('span');
+        line_span.className = 'pitch-line';
+
+        const pitch_span = document.createElement('span');
+        pitch_span.className = "pitch-" + pitch_segment;
+        pitch_span.appendChild(text_span);
+        pitch_span.appendChild(line_span);
+        return pitch_span;
+    };
+
+    function initialize_pronunciation() {
+        const kata = (`{{kana:Expression Furigana}}` || `{{Expression Reading}}`)
+            .split('').map(convert_to_kata).join('');
+
+        const accent_nuclei_matches = `{{Accent Nuclei}}`.match(/\d+/g);
+        if (!accent_nuclei_matches) {
+            const guide = document.querySelector('#pronunciation > div');
+            guide.innerText = kata;
+            return;
+        }
+        const accent_nuclei = accent_nuclei_matches.map(Number);
+
+        const moras = compute_moras(kata);
+
+        const guides = document.createElement('ul');
+        for (let accent_nucleus of accent_nuclei) {
+            const guide = document.createElement('li');
+            guide.className = 'highlight-' + compute_pitch_kind(moras, accent_nucleus);
+            for (let [substring, pitch_segment] of compute_pitch_pattern(moras, accent_nucleus))
+                guide.appendChild(create_pitch_span(substring, pitch_segment));
+
+            guides.appendChild(guide);
+        }
+
+        const pronunciation = document.querySelector('#pronunciation');
+        if (!pronunciation) return;
+        pronunciation.innerHTML = '';
+        pronunciation.appendChild(guides);
+
+        if (accent_nuclei.length === 1) {
+            const pitch_class = 'highlight-' + compute_pitch_kind(moras, accent_nuclei[0]);
+            let sentence = document.querySelector('#sentence');
+            if (!sentence) return;
+            for (const word of sentence.getElementsByTagName('b')) {
+                word.className = pitch_class;
+            }
+        }
+    }
+
+    // Set up glossary carousel.
+
+    function hide_primary_glosses() {
+        const primary_item = document.querySelector('#primary li[data-dictionary]');
+        const qa = document.querySelector('#qa');
+        if (!primary_item || !qa) return;
+        let style = document.createElement('style');
+        style.textContent =
+            `#glossary li[data-dictionary="${primary_item.getAttribute('data-dictionary')
+            }"] { display:none !important; }`;
+        qa.appendChild(style);
+    }
+
+    function switch_to_dictionary(glossaries, index) {
+        if (glossaries.length === 0) return;
+        let normalized_index = index % glossaries.length;
+        while (normalized_index < 0) normalized_index += glossaries.length;
+        const [glossary_id, glossary_name, glossary_content] = glossaries[normalized_index]
+
+        const definition_title = document.querySelector('#definition-title-box');
+        if (definition_title) definition_title.classList.remove('hidden');
+        definition_title.innerText = glossary_name;
+
+        const definition_box = document.querySelector('#definition-box');
+        if (!definition_box) return;
+        definition_box.classList.remove('hidden');
+        definition_box.innerHTML = `<div id=${glossary_id}>${glossary_content}</div>`;
+    }
+
+    function is_nonempty(content) {
+        return content && content.replace(/<\/?[^>]+(>|$)/g, '').trim() !== '';
+    }
+
+    function initialize_dictionary() {
+        let index = 0;
+        let glossaries = [];
+
+        const primary_glossary = `{{Primary Definition}}`;
+        if (is_nonempty(primary_glossary))
+            glossaries.push(['primary', 'Primary Definition', primary_glossary]);
+
+        const extended_glossary = `{{Glossary}}`;
+        if (extended_glossary)
+            glossaries.push(['glossary', 'Glossary', extended_glossary]);
+
+        if (glossaries.length > 0) {
+            switch_to_dictionary(glossaries, index);
+            hide_primary_glosses();
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === '/') switch_to_dictionary(glossaries, ++index)
+        });
+    }
+
+    // Process space-separated tag list into separate tags.
+
+    function separate_tags() {
+        const tags_box = document.querySelector('#tags-box');
+        if (!tags_box) return;
+        tags_box.innerHTML = '';
+        for (let tag_text of `{{Tags}}`.split(' ')) {
+            const tag_div = document.createElement('div');
+            tag_div.className = 'tag';
+            tag_div.innerText = tag_text;
+            tags_box.appendChild(tag_div);
+        }
+    }
+    
+    function initialize() {
+        initialize_pronunciation();
+        initialize_dictionary();
+        hide_primary_glosses();
+        separate_tags();
+    }
+
+    initialize();
+</script>
