@@ -1,12 +1,12 @@
 <header style="visibility: hidden"></header>
 
-<main lang="ja">
-    <div id="front-expression">{{Expression}}</div>
+<main>
+    <div id="front-expression" lang="ja">{{Expression}}</div>
     {{#Sentence Furigana}}
-    <div id="front-sentence">{{kanji:Sentence Furigana}}</div>
+    <div id="front-sentence" lang="ja">{{kanji:Sentence Furigana}}</div>
     {{/Sentence Furigana}}
     {{^Sentence Furigana}}{{#Sentence}}
-    <div id="front-sentence">{{kanji:Sentence}}</div>
+    <div id="front-sentence" lang="ja">{{kanji:Sentence}}</div>
     {{/Sentence}}{{/Sentence Furigana}}
 
     {{#Hint}}

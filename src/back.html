@@ -6,7 +6,7 @@
 
 <main>
     <div id="expression-box">
-        <div id="expression">
+        <div id="expression" lang="ja">
             {{#Expression Furigana}}{{furigana:Expression Furigana}}{{/Expression Furigana}}{{^Expression Furigana}}{{Expression}}{{/Expression Furigana}}
         </div>
 
@@ -26,7 +26,7 @@
 
     {{#Sentence Furigana}}
     <div id="sentence-box">
-        <div id="sentence">
+        <div id="sentence" lang="ja">
             {{#Sentence Furigana}}{{furigana:Sentence Furigana}}{{/Sentence Furigana}}
             {{^Sentence Furigana}}{{furigana:Sentence}}{{/Sentence Furigana}}
         </div>
@@ -41,7 +41,7 @@
 
     {{^Sentence Furigana}}{{#Sentence}}
     <div id="sentence-box">
-        <div id="sentence">
+        <div id="sentence" lang="ja">
             {{#Sentence Furigana}}{{furigana:Sentence Furigana}}{{/Sentence Furigana}}
             {{^Sentence Furigana}}{{furigana:Sentence}}{{/Sentence Furigana}}
         </div>
@@ -146,7 +146,7 @@
         line_span.className = 'pitch-line';
 
         const pitch_span = document.createElement('span');
-        pitch_span.className = "pitch-" + pitch_segment;
+        pitch_span.className = 'pitch-' + pitch_segment;
         pitch_span.appendChild(text_span);
         pitch_span.appendChild(line_span);
         return pitch_span;
@@ -270,7 +270,7 @@
             hide_primary_glosses();
         }
 
-        document.addEventListener("keydown", (e) => {
+        document.addEventListener('keydown', (e) => {
             if (e.key === '/') switch_to_dictionary(glossaries, ++index)
         });
     }
