@@ -1,7 +1,6 @@
 /* Color scheme options. */
 
 .card.nightMode {
-  --bg-color: var(--canvas);
   --bg-elevated: rgba(0, 0, 0, 0.12);
 
   --fg-color: white;
@@ -11,14 +10,13 @@
   --atamadaka: #fb4b4e;
   --nakadaka: #ffb140;
   --odaka: #96f550;
-  --highlight: #af85f4;
+  --highlight: #5dfdcb;
 
   --bold: var(--highlight);
   --link: #93c5fd;
 }
 
 .card:not(.nightMode) {
-  --bg-color: #fffaf0;
   --bg-elevated: rgba(0, 0, 0, 0.03);
 
   --fg-color: #333333;
@@ -69,7 +67,6 @@
 
 .card {
   font-family: var(--font-sans);
-  background-color: var(--bg-color) !important;
   color: var(--fg-color) !important;
 }
 
@@ -85,7 +82,7 @@ ruby rt {
   user-select: none;
 }
 
-/* Generic classes */
+/* Generic classes. */
 
 .hidden {
   display: none !important;
@@ -269,15 +266,12 @@ footer {
   opacity: 0;
 }
 
-#sentence ruby:hover rt {
-  opacity: 1;
-}
-
+#sentence:hover ruby rt,
 #sentence b>ruby rt {
   opacity: 1;
 }
 
-/* Definitions */
+/* Definitions. */
 
 #definition-title-box {
   color: var(--fg-subtle);

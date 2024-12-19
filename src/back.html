@@ -117,6 +117,26 @@
         ];
     }
 
+    function infer_nucleus_from_kaishi(kaishi_pre) {
+        const modified = kaishi_pre.replace(/[ャュョァィゥェォ]/g, '');
+        
+        if (modified.charAt(0) === '[') return 1;
+        else if (modified.includes('[')) return modified.indexOf(']') - 1;
+        else return 0;
+    }
+
+    function infer_nuclei_from_kaishi(kaishi_raw) {
+        return kaishi_raw
+            .replaceAll('*', '')
+            .replaceAll('<br>', '')
+            .replaceAll('<span style="color: red;">°</span>', '')
+            .replace(/<span style="color: [^\"]*?;">([\u30A0-\u30FF]*?)<\/span>/g, (_, group) => group)
+            .replace(/<span style="[^\"]*?"><span style="[^\"]*?">([\u30A0-\u30FF]*?)<\/span><span style="[^\"]*?border-right[^\"]*?"><\/span><\/span>/g, (_, group) => '[' +  group + ']')
+            .replace(/<span style="[^\"]*?"><span style="[^\"]*?">([\u30A0-\u30FF]*?)<\/span><span style="[^\"]*?"><\/span><\/span>/g, (_, group) => group)
+            .split('・')
+            .map(infer_nucleus_from_kaishi);
+    }
+
     function create_pitch_span(substring, pitch_segment) {
         const text_span = document.createElement('span');
         text_span.className = 'pitch-char';
@@ -132,22 +152,41 @@
         return pitch_span;
     };
 
-    function initialize_pronunciation() {
-        const kata = (`{{kana:Expression Furigana}}` || `{{Expression Reading}}`)
-            .split('').map(convert_to_kata).join('');
+    function retrieve_kata_from_furi(element) {
+        return element.innerHTML
+            .replace(/<\/?ruby>/g, '')
+            .replace(/<rb>.*?<\/rb>/g, '')
+            .replace(/<rt>(.*?)<\/rt>/g, (_, group) => group)
+            .split('')
+            .map(convert_to_kata)
+            .join('');
+    }
 
-        const accent_nuclei_matches = `{{Accent Nuclei}}`.match(/\d+/g);
-        if (!accent_nuclei_matches) {
+    function initialize_pronunciation() {
+        let katas = (`{{Expression Reading}}` || `{{kana:Expression Furigana}}`)
+            .split('・').map(kata => kata.split('').map(convert_to_kata).join(''));
+        if (katas.length == 0) return;
+
+        const accent_nuclei_raw = `{{Accent Nuclei}}`;
+        const accent_nuclei = `{{Tags}}`.split(' ').includes('kaishi')
+            ? infer_nuclei_from_kaishi(accent_nuclei_raw)
+            : (accent_nuclei_raw.match(/\d+/g) || []).map(Number);
+
+        if (katas.length === 1 && accent_nuclei.length > 1) {
+            katas = Array(accent_nuclei.length).fill(katas[0]);
+        }
+
+        if (accent_nuclei.length != katas.length) {
             const guide = document.querySelector('#pronunciation > div');
-            guide.innerText = kata;
+            guide.innerText = katas[0];
             return;
         }
-        const accent_nuclei = accent_nuclei_matches.map(Number);
 
-        const moras = compute_moras(kata);
+        const moras_per_reading = katas.map(compute_moras);
 
         const guides = document.createElement('ul');
-        for (let accent_nucleus of accent_nuclei) {
+        for (let [index, accent_nucleus] of accent_nuclei.entries()) {
+            const moras = moras_per_reading[index];
             const guide = document.createElement('li');
             guide.className = 'highlight-' + compute_pitch_kind(moras, accent_nucleus);
             for (let [substring, pitch_segment] of compute_pitch_pattern(moras, accent_nucleus))
@@ -161,13 +200,23 @@
         pronunciation.innerHTML = '';
         pronunciation.appendChild(guides);
 
-        if (accent_nuclei.length === 1) {
-            const pitch_class = 'highlight-' + compute_pitch_kind(moras, accent_nuclei[0]);
-            let sentence = document.querySelector('#sentence');
-            if (!sentence) return;
-            for (const word of sentence.getElementsByTagName('b')) {
-                word.className = pitch_class;
-            }
+        let sentence = document.querySelector('#sentence');
+        if (!sentence) return;
+
+        const removable_endings = ['イ', 'ウ', 'ク', 'グ', 'ス', 'ツ', 'ブ', 'ム', 'ル'];
+        for (const word of sentence.getElementsByTagName('b')) {
+            const target_kata = retrieve_kata_from_furi(word);
+            let pitch_kinds = accent_nuclei.length === 1
+                ? [compute_pitch_kind(moras_per_reading[0], accent_nuclei[0])]
+                : [
+                    ...new Set(Array.from(katas.entries())
+                        .filter(value => target_kata.startsWith(value[1])
+                            || (removable_endings.includes(value[1].slice(-1))
+                                && target_kata.startsWith(value[1].slice(0, -1))))
+                        .map(value =>
+                            compute_pitch_kind(moras_per_reading[value[0]], accent_nuclei[value[0]])))
+                ];
+            if (pitch_kinds.length === 1) word.className = 'highlight-' + pitch_kinds[0];
         }
     }
 
